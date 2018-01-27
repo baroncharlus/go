@@ -21,22 +21,22 @@ import (
 
 func main() {
 	// address: GB6S3XHQVL6ZBAF6FIK62OCK3XTUI4L5Z5YUVYNBZUXZ4AZMVBQZNSAU
-	from := "SCRUYGFG76UPX3EIUWGPIQPQDPD24XPR3RII5BD53DYPKZJGG43FL5HI"
+	from := "SC4IFTLTGBOET5ES7OQNUCYDSVL3VJIZHKF4YFFBEBNMX5CYDWDNYIT3"
 
 	// seed: SDLJZXOSOMKPWAK4OCWNNVOYUEYEESPGCWK53PT7QMG4J4KGDAUIL5LG
-	to := "GA3A7AD7ZR4PIYW6A52SP6IK7UISESICPMMZVJGNUTVIZ5OUYOPBTK6X"
+	to := "GDHOKLOYCSLRFBN3TLPS23TC2STK4OK6K77HSLLQDLKFDWFZGC3S2BKO"
 
-	tx := b.Transaction(
- 		b.SourceAccount{from},
- 		b.TestNetwork,
- 		b.AutoSequence{horizon.DefaultTestNetClient},
- 		b.Payment(
- 			b.Destination{to},
-  			b.NativeAmount{"0.1"},
-  		),
-  	)
-	
-	txe := tx.Sign(from)
+	tx, _ := b.Transaction(
+		b.SourceAccount{AddressOrSeed: from},
+		b.TestNetwork,
+		b.AutoSequence{SequenceProvider: horizon.DefaultTestNetClient},
+		b.Payment(
+			b.Destination{AddressOrSeed: to},
+			b.NativeAmount{Amount: "0.1"},
+		),
+	)
+
+	txe, _ := tx.Sign(from)
 	txeB64, err := txe.Base64()
 
 	if err != nil {
