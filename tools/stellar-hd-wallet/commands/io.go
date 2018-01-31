@@ -52,7 +52,6 @@ func readPassword(prompt string) (password string) {
 	pass, err := t.ReadPassword(prompt)
 	if err != nil {
 		fmt.Fprintln(os.Stderr)
-		log.Fatal(err)
 	}
 
 	password = string(pass)
@@ -60,11 +59,13 @@ func readPassword(prompt string) (password string) {
 }
 
 func savePassword() (password string) {
-	password = readPassword("Enter your password: ")
-	confirm := readPassword("Confirm your password: ")
-	if password != confirm {
-		fmt.Println("Passwords did not match. Please try again:")
-		savePassword()
+	password = readPassword("Enter your password (leave empty if none): ")
+	if password != "" {
+		confirm := readPassword("Confirm your password: ")
+		if password != confirm {
+			fmt.Println("Passwords did not match. Please try again:")
+			savePassword()
+		}
 	}
 	return
 }
