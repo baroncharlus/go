@@ -56,7 +56,7 @@ func readPassword(prompt string) (password string) {
 	}
 
 	password = string(pass)
-	return
+	return strings.TrimRight(password, "\n")
 }
 
 func savePassword() (password string) {
