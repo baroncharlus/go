@@ -3,7 +3,7 @@ package commands
 import (
 	"bufio"
 	"fmt"
-	"golang.org/x/crypto/ssh/terminal"
+	"github.com/howeyc/gopass"
 	"io"
 	"log"
 	"os"
@@ -14,13 +14,31 @@ import (
 var reader = bufio.NewReader(os.Stdin)
 var out io.Writer = os.Stdout
 
-func readString() string {
-	line, _ := reader.ReadString('\n')
-	return strings.TrimRight(line, "\n")
+func readString(prompt string, private bool) (string, error) {
+	fmt.Fprintf(os.Stdout, prompt)
+	var line string
+	var err error
+
+	if private {
+		str, err := gopass.GetPasswdMasked()
+		if err != nil {
+			return "", err
+		}
+		line = string(str)
+	} else {
+		line, err = reader.ReadString('\n')
+		if err != nil {
+			return "", err
+		}
+	}
+	return strings.Trim(line, "\n"), nil
 }
 
 func readUint() uint32 {
-	line := readString()
+	line, err := readString("", false)
+	if err != nil {
+		panic(err)
+	}
 	number, err := strconv.Atoi(line)
 	if err != nil {
 		log.Fatal("Invalid value")
@@ -37,33 +55,20 @@ func println(a ...interface{}) {
 	fmt.Fprintln(out, a...)
 }
 
-func readPassword(prompt string) (password string) {
-	oldState, err := terminal.MakeRaw(int(os.Stdin.Fd()))
+func getPassword(prompt string) (pass string) {
+	pass, err := readString(prompt, true)
 	if err != nil {
-		fmt.Fprintln(os.Stderr)
+		panic(err)
 	}
-
-	// gives our terminal back if we have a problem converting the file
-	// descriptor to raw mode.
-	defer terminal.Restore(int(os.Stdin.Fd()), oldState)
-
-	// create a password entry terminal raw mode stdin
-	t := terminal.NewTerminal(os.Stdin, "")
-	pass, err := t.ReadPassword(prompt)
-	if err != nil {
-		fmt.Fprintln(os.Stderr)
-	}
-
-	password = string(pass)
-	return strings.TrimRight(password, "\n")
+	return
 }
 
-func savePassword() (password string) {
-	password = readPassword("Enter your password (leave empty if none): ")
-	if password != "" {
-		confirm := readPassword("Confirm your password: ")
-		if password != confirm {
-			fmt.Println("Passwords did not match. Please try again:")
+func savePassword() (pass string) {
+	pass = getPassword("Enter your password (leave empty if none): ")
+	if pass != "" {
+		confirm := getPassword("Confirm your password: ")
+		if pass != confirm {
+			fmt.Println("Passwords do not match. Please try again.")
 			savePassword()
 		}
 	}
