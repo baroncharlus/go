@@ -39,8 +39,7 @@ var AccountsCmd = &cobra.Command{
 			}
 		}
 
-		printf("Enter password (leave empty if none): ")
-		password := readString()
+		password := savePassword()
 
 		mnemonic := strings.Join(words, " ")
 		println("Mnemonic:", mnemonic)
